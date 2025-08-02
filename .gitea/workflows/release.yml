@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-2404
     steps:
       # 1. Checkout código
       - name: Checkout repository
