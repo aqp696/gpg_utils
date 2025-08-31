@@ -29,6 +29,11 @@ class MainWindow(QWidget):
         self.layout.addWidget(self.label_seed)
         self.layout.addWidget(self.entry_seed)
 
+        # Botón copiar
+        self.btn_copy = QPushButton("Copy")
+        self.btn_copy.clicked.connect(self.copy_seed)
+        self.layout.addWidget(self.btn_copy)
+
         # Botones
         self.btn_encrypt = QPushButton("Encrypt")
         self.btn_encrypt.clicked.connect(self.run_encrypt)
@@ -38,6 +43,16 @@ class MainWindow(QWidget):
         self.layout.addWidget(self.btn_decrypt)
 
         self.setLayout(self.layout)
+
+    # Método para copiar al portapapeles
+    def copy_seed(self):
+        seed_text = self.entry_seed.toPlainText().strip()
+        if seed_text:
+            clipboard = QApplication.clipboard()
+            clipboard.setText(seed_text)
+            QMessageBox.information(self, "Copiado", "Frase BIP-39 copiada al portapapeles")
+        else:
+            QMessageBox.warning(self, "Vacío", "No hay frase para copiar")
 
     def select_file(self):
         path, _ = QFileDialog.getOpenFileName(self, "Seleccionar archivo")
