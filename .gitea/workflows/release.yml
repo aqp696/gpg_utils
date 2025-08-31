@@ -11,7 +11,9 @@ jobs:
     steps:
       # 1. Checkout código
       - name: Checkout repository
-        uses: actions/checkout@v4
+        # env:
+        #   PATH: "/home/aqueipo/.asdf/shims:$PATH"
+        uses: actions/checkout@v5
 
       # 2. Configurar GPG (clave privada como secret)
       - name: Set up GPG
