@@ -14,6 +14,9 @@ jobs:
         # env:
         #   PATH: "/home/aqueipo/.asdf/shims:$PATH"
         uses: actions/checkout@v5
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
       # 2. Configurar GPG (clave privada como secret)
       - name: Set up GPG
