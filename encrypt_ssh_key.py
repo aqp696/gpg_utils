@@ -21,11 +21,11 @@ def encrypt_file(file_path, seed):
         f.write(encrypted)
     return out_file
 
-def main():
+def main(args=None):
     parser = argparse.ArgumentParser(description="Cifra clave SSH privada usando frase BIP-39.")
     parser.add_argument("--input", required=True, help="Clave SSH privada (ej: id_ed25519)")
     parser.add_argument("--output", default="id_ed25519.enc", help="Archivo cifrado de salida")
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     # Generar frase
     mnemo = Mnemonic("english")
