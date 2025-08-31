@@ -55,8 +55,10 @@ jobs:
         env:
           RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}  # Token con permisos de escritura
         run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          RELEASE_URL="https://your-gitea-instance.com/api/v1/repos/${{ github.repository }}/releases"
+          TAG_NAME=${GITEA_REF#refs/tags/}
+          REPO_PATH=$GITEA_REPOSITORY
+          GITEA_URL="https://gitea.com/api/v1"
+          RELEASE_URL="$GITEA_URL/repos/$REPO_PATH/releases"
           
           # Crear release
           curl -X POST \
@@ -71,7 +73,7 @@ jobs:
 
           # Subir archivos (espera 5s para que la release se cree)
           sleep 5
-          UPLOAD_URL="https://your-gitea-instance.com/api/v1/repos/${{ github.repository }}/releases/tags/$TAG_NAME/assets"
+          UPLOAD_URL="$GITEA_URL/repos/$REPO_PATH/releases/tags/$TAG_NAME/assets"
           
           for file in release/*; do
             curl -X POST \
