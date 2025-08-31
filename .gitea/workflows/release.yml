@@ -37,6 +37,7 @@ jobs:
       # 4. Generar SHA256SUMS y firmas
       - name: Generate checksums and signatures
         run: |
+          echo "$GPG_PRIVATE_KEY_NO_PASS" | gpg --batch --import
           cd release
           sha256sum * > SHA256SUMS
           gpg --batch --yes --armor --detach-sign --output SHA256SUMS.sig SHA256SUMS
@@ -46,6 +47,8 @@ jobs:
               gpg --batch --yes --armor --detach-sign --output "$file.sig" "$file"
             fi
           done
+        env:
+          GPG_PRIVATE_KEY_NO_PASS: ${{ secrets.GPG_PRIVATE_KEY_NO_PASS }}
 
       # 5. Subir archivos a la release (usando API de Gitea)
       - name: Create Release and Upload Assets
