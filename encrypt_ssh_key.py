@@ -10,6 +10,17 @@ def pad_pkcs7(data):
     pad_len = 16 - len(data) % 16
     return data + bytes([pad_len] * pad_len)
 
+def encrypt_file(file_path, seed):
+    key = sha256(seed.encode()).digest()
+    with open(file_path, "rb") as f:
+        data = f.read()
+    cipher = AES.new(key, AES.MODE_CBC, iv=b"\x00"*16)
+    encrypted = cipher.encrypt(pad_pkcs7(data))
+    out_file = file_path + ".enc"
+    with open(out_file, "wb") as f:
+        f.write(encrypted)
+    return out_file
+
 def main():
     parser = argparse.ArgumentParser(description="Cifra clave SSH privada usando frase BIP-39.")
     parser.add_argument("--input", required=True, help="Clave SSH privada (ej: id_ed25519)")

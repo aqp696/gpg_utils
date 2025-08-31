@@ -10,6 +10,17 @@ def unpad_pkcs7(data):
     pad_len = data[-1]
     return data[:-pad_len]
 
+def decrypt_file(file_path, seed):
+    key = sha256(seed.encode()).digest()
+    with open(file_path, "rb") as f:
+        encrypted = f.read()
+    cipher = AES.new(key, AES.MODE_CBC, iv=b"\x00"*16)
+    decrypted = unpad_pkcs7(cipher.decrypt(encrypted))
+    out_file = file_path.replace(".enc", ".dec")
+    with open(out_file, "wb") as f:
+        f.write(decrypted)
+    return out_file
+
 def main():
     parser = argparse.ArgumentParser(description="Descifra una clave SSH privada desde una frase BIP-39.")
     parser.add_argument("--input", default="id_ed25519.enc", help="Archivo cifrado de entrada")
