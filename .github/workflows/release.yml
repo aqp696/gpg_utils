@@ -1,0 +1,68 @@
+name: Release with GPG Signing
+
+on:
+  push:
+    tags:
+      - 'v*' # Ejemplo: v1.0.0
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout código
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configurar GPG (clave privada como secret)
+      - name: Set up GPG
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }} # Opcional
+        run: |
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent
+          gpgconf --launch gpg-agent
+
+      # 3. Generar archivos (ajusta para tu proyecto)
+      - name: Build Python scripts
+        run: |
+          mkdir -p release
+          cp *.py release/
+          zip -r release/scripts.zip *.py
+
+      # 4. Generar SHA256SUMS y firmas
+      - name: Generate checksums and signatures
+        run: |
+          echo "$GPG_PRIVATE_KEY_NO_PASS" | gpg --batch --import
+          cd release
+          sha256sum * > SHA256SUMS
+          gpg --batch --yes --armor --detach-sign --output SHA256SUMS.sig SHA256SUMS
+          # Firma individual opcional
+          for file in *; do
+            if [ "$file" != "SHA256SUMS" ] && [ "$file" != "SHA256SUMS.sig" ]; then
+              gpg --batch --yes --armor --detach-sign --output "$file.sig" "$file"
+            fi
+          done
+        env:
+          GPG_PRIVATE_KEY_NO_PASS: ${{ secrets.GPG_PRIVATE_KEY_NO_PASS }}
+
+      # 5. Subir archivos como artifact (útil para pruebas previas)
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-files
+          path: release/*
+
+      # 6. Crear release en GitHub y subir assets
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "Release ${{ github.ref_name }}"
+          tag_name: ${{ github.ref_name }}
+          body: "Release firmada. Verificar con GPG y SHA256SUMS."
+          files: |
+            release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
