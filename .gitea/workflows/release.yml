@@ -71,7 +71,16 @@ jobs:
             }' \
             "$RELEASE_URL")
           
+          echo "Response from API:"
+          echo "$RESPONSE"
+                    
           RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id')
+
+          if [ -z "$RELEASE_ID" ]; then
+            echo "Error: No se pudo crear la release. Respuesta:"
+            echo "$RESPONSE"
+            exit 1
+          fi
 
           # Subir archivos (espera 5s para que la release se cree)
           sleep 5
