@@ -61,7 +61,7 @@ jobs:
           RELEASE_URL="$GITEA_URL/repos/$REPO_PATH/releases"
           
           # Crear release
-          curl -X POST \
+          RESPONSE=$(curl -X POST \
             -H "Authorization: token $RELEASE_TOKEN" \
             -H "Content-Type: application/json" \
             -d '{
@@ -69,7 +69,9 @@ jobs:
               "name": "Release '"$TAG_NAME"'",
               "body": "Release firmada. Verificar con GPG y SHA256SUMS."
             }' \
-            "$RELEASE_URL"
+            "$RELEASE_URL")
+          
+          RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id')
 
           # Subir archivos (espera 5s para que la release se cree)
           sleep 5
@@ -80,5 +82,5 @@ jobs:
               -H "Authorization: token $RELEASE_TOKEN" \
               -H "Content-Type: application/octet-stream" \
               --data-binary @"$file" \
-              "$UPLOAD_URL?name=$(basename $file)"
+               "$GITEA_URL/repos/$REPO_PATH/releases/$RELEASE_ID/assets?name=$(basename $file)"
           done
